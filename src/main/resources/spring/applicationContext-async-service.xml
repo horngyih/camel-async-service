@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+">
+    <context:component-scan base-package="com.ubicompsystem.htng.async"/>
+
+    <cxf:cxfEndpoint
+            xmlns:as="http://htng.ubicompsystem.com/async/types/v1"
+            name="asyncServiceCXF"
+            address="/async"
+            endpointName="as:AsyncServicePort"
+            serviceName="as:AsyncService"
+            wsdlURL="classpath:wsdl/async-service.wsdl"/>
+
+    <camel:camelContext>
+        <camel:dataFormats>
+            <camel:jaxb contextPath="com.ubicompsystem.htng.async.types.v1" id="asyncJaxb"/>
+        </camel:dataFormats>
+        <camel:route id="async-service-cxf-route">
+            <camel:from uri="cxf:bean:asyncServiceCXF?dataFormat=PAYLOAD"/>
+            <camel:log message="Headers : ${headers}"/>
+            <camel:log message="SOAPAction : ${header.SOAPAction}"/>
+            <camel:log message="Operation Name : ${header.operationName}"/>
+            <camel:toD uri="direct:${header.operationName}"/>
+        </camel:route>
+
+        <camel:route id="async-service-save">
+            <camel:from uri="direct:saveGuest"/>
+            <camel:unmarshal ref="asyncJaxb"/>
+            <camel:setBody>
+                <camel:simple>${body.guest}</camel:simple>
+            </camel:setBody>
+            <camel:bean ref="saveGuestHandler"/>
+            <camel:bean ref="guestResponseBuilder"/>
+            <camel:marshal ref="asyncJaxb"/>
+        </camel:route>
+
+        <camel:route id="async-service-get-request">
+            <camel:from uri="direct:getGuest_SubmitRequest"/>
+            <camel:unmarshal ref="asyncJaxb"/>
+            <camel:setHeader headerName="responseURL">
+                <camel:simple>${body.replyTo}</camel:simple>
+            </camel:setHeader>
+            <camel:setBody>
+                <camel:simple>${body.guest}</camel:simple>
+            </camel:setBody>
+           <camel:wireTap uri="direct:processGetGuest" copy="true" />
+            <camel:setBody>
+                <camel:simple></camel:simple>
+            </camel:setBody>
+            <camel:marshal ref="asyncJaxb"/>
+        </camel:route>
+
+        <camel:route id="async-service-get-response">
+            <camel:from uri="direct:getGuest_SubmitResult"/>
+            <camel:log message="Direct : getGuest_SubmitResult"/>
+            <camel:unmarshal ref="asyncJaxb"/>
+            <camel:log message="Message : ${body}"/>
+            <camel:log message="Guest : ${body.guest}"/>
+        </camel:route>
+
+        <camel:route id="process-get-request">
+            <camel:from uri="direct:processGetGuest"/>
+            <camel:log message="Headers : ${headers}"/>
+            <camel:log message="Response URL : ${header.responseURL}"/>
+            <camel:log message="Body : ${body}"/>
+            <camel:log message="Guest ID : ${body.guestID}"/>
+            <camel:log message="First Name : ${body.nameInfo}"/>
+            <camel:bean ref="getGuestHandler"/>
+            <camel:log message="Body : ${body}"/>
+            <camel:log message="First Name : ${body.nameInfo.firstName}"/>
+            <camel:bean ref="guestResponseBuilder"/>
+            <camel:log message="Post : ${body}"/>
+            <camel:setHeader headerName="SoapAction">
+                <camel:constant>getGuest_SubmitResult</camel:constant>
+            </camel:setHeader>
+            <camel:setHeader headerName="operationName">
+                <camel:constant>getGuest_SubmitResult</camel:constant>
+            </camel:setHeader>
+            <camel:toD uri="cxf:${header.responseURL}?serviceClass=com.ubicompsystem.htng.async.types.v1.AsyncServicePort&amp;wsdlURL=http://localhost:8080/webservices/async?wsdl"/>
+            <camel:log message="Response Body : ${body}"/>
+        </camel:route>
+    </camel:camelContext>
+</beans>

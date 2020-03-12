@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="http://htng.ubicompsystem.com/async/types/v1"
+    targetNamespace="http://htng.ubicompsystem.com/async/types/v1"
+    elementFormDefault="qualified"
+>
+    <element name="getGuestRequest" type="tns:GetGuestRequest"/>
+    <element name="guestRequest" type="tns:GuestRequest"/>
+    <element name="guestResponse" type="tns:GuestResponse"/>
+    <element name="guest" type="tns:Guest"/>
+    <complexType name="NameInfo">
+        <sequence>
+            <element name="Title" minOccurs="0">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="FirstName">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="LastName">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+        </sequence>
+    </complexType>
+    <complexType name="Phone">
+        <sequence>
+            <element name="CountryCode" minOccurs="0">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="PhoneNumber">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="Extension" minOccurs="0">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+        </sequence>
+    </complexType>
+    <complexType name="Guest">
+        <sequence>
+            <element name="GuestID">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="NameInfo" type="tns:NameInfo"/>
+            <element name="Phone" type="tns:Phone"/>
+            <element name="Email">
+                <simpleType>
+                    <restriction base="string">
+                        <whiteSpace value="collapse"/>
+                    </restriction>
+                </simpleType>
+            </element>
+        </sequence>
+    </complexType>
+    <complexType name="GetGuestRequest">
+        <sequence>
+            <element name="ReplyTo">
+                <simpleType>
+                    <restriction base="string"/>
+                </simpleType>
+            </element>
+            <element name="Guest" type="tns:Guest"/>
+        </sequence>
+    </complexType>
+    <complexType name="GuestRequest">
+        <sequence>
+            <element name="Guest" type="tns:Guest"/>
+        </sequence>
+    </complexType>
+   <complexType name="GuestResponse">
+       <sequence>
+           <choice>
+               <element name="acknowledge" minOccurs="0"/>
+               <element name="Success" minOccurs="0"/>
+               <element name="Error" minOccurs="0">
+                   <complexType>
+                       <sequence>
+                           <element name="ErrorCode">
+                               <simpleType>
+                                   <restriction base="string">
+                                       <whiteSpace value="collapse"/>
+                                   </restriction>
+                               </simpleType>
+                           </element>
+                           <element name="ErrorMessage">
+                               <simpleType>
+                                   <restriction base="string">
+                                       <whiteSpace value="collapse"/>
+                                   </restriction>
+                               </simpleType>
+                           </element>
+
+                       </sequence>
+                   </complexType>
+               </element>
+           </choice>
+           <element name="Guest" minOccurs="0" type="tns:Guest"/>
+        </sequence>
+    </complexType>
+</schema>

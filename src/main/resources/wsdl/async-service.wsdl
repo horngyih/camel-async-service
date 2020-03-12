@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definitions
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:wsa="http://www.w3.org/2005/08/addressing"
+    xmlns:as="http://htng.ubicompsystem.com/async/types/v1"
+    xmlns:tns="http://htng.ubicompsystem.com/async/types/v1"
+    targetNamespace="http://htng.ubicompsystem.com/async/types/v1"
+    name="async-service"
+    xsi:schemaLocation="
+        http://www.w3.org/2005/08/addressing https://www.w3.org/2006/03/addressing/ws-addr.xsd
+">
+    <types>
+        <xsd:schema>
+            <xsd:import namespace="http://htng.ubicompsystem.com/async/types/v1" schemaLocation="schemas/async-service.xsd"/>
+        </xsd:schema>
+    </types>
+    <message name="getGuestRequest">
+        <part name="getGuestRequest" element="as:getGuestRequest"/>
+    </message>
+    <message name="guestRequest">
+        <part name="guestRequest" element="as:guestRequest"/>
+    </message>
+    <message name="guestResponse">
+        <part name="guestResponse" element="as:guestResponse"/>
+    </message>
+    <portType name="AsyncServicePort">
+       <operation name="getGuest_SubmitRequest">
+            <input name="getGuestRequest" message="tns:getGuestRequest"/>
+            <output name="guestResponse" message="tns:guestResponse"/>
+        </operation>
+        <operation name="getGuest_SubmitResult">
+            <input name="guestResponse" message="tns:guestResponse"/>
+        </operation>
+        <operation name="saveGuest">
+            <input name="guestRequest" message="tns:guestRequest"/>
+            <output name="guestResponse" message="tns:guestResponse"/>
+        </operation>
+   </portType>
+    <binding name="AsyncServiceSoapBinding" type="tns:AsyncServicePort">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+       <operation name="getGuest_SubmitRequest">
+            <soap:operation style="document" soapAction="getGuest_SubmitRequest"/>
+            <input name="getGuestRequest">
+                <soap:body use="literal"/>
+            </input>
+           <output name="guestResponse">
+           </output>
+        </operation>
+        <operation name="getGuest_SubmitResult">
+            <soap:operation style="document" soapAction="getGuest_SubmitResult"/>
+            <input name="guestResponse">
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+        <operation name="saveGuest">
+            <soap:operation style="document" soapAction="saveGuest"/>
+            <input name="guestRequest">
+                <soap:body use="literal"/>
+            </input>
+            <output name="guestResponse">
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+    <service name="AsyncService">
+        <port name="AsyncServicePort" binding="tns:AsyncServiceSoapBinding">
+            <soap:address location="http://0.0.0.0:8181/cxf/asyncservice/v1"/>
+        </port>
+    </service>
+</definitions>
